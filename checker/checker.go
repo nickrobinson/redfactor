@@ -27,7 +27,7 @@ const (
 
 var fmClient *funcmon.Client
 
-func RunChecker() {
+func RunChecker(c chan int) {
 	db, err := sql.Open("sqlite3", "./redfactor.db")
 	checkErr(err)
 
@@ -80,13 +80,13 @@ func RunChecker() {
 			val, err := vals[len(vals)-1][1].(json.Number).Float64()
 			checkErr(err)
 
-			go evaluate(db, rowId, float64(val))
+			go evaluate(db, rowId, float64(val), c)
 		}
 		time.Sleep(5 * time.Minute)
 	}
 }
 
-func evaluate(db *sql.DB, id int, value float64) {
+func evaluate(db *sql.DB, id int, value float64, c chan int) {
 	fmClient.StartMonitoring("evaluate")
 	query := fmt.Sprintf("SELECT * FROM thresholds WHERE id = %d", id)
 	rows, err := db.Query(query)
@@ -105,10 +105,12 @@ func evaluate(db *sql.DB, id int, value float64) {
 		case threshold_type == BELOW_THRESHOLD:
 			if value < threshold {
 				log.Printf("Detected Threshold Breach: %s", description)
+				c <- id
 			}
 		case threshold_type == ABOVE_THRESHOLD:
 			if value > threshold {
 				log.Printf("Detected Threshold Breach: %s", description)
+				c <- id
 			}
 		}
 	}

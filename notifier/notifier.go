@@ -1,4 +1,4 @@
-package main
+package notifier
 
 import (
 	"gopkg.in/gcfg.v1"
@@ -17,9 +17,16 @@ type Notifier struct {
 	
 }
 
+func RunNotifier(c chan int) {
+	for {
+		rowId := <-c
+		fmt.Println("Row Id: ", rowId)
+	}
+}
+
 func Notify() {
 	var cfg Config
-	err := gcfg.ReadFileInto(&cfg, "test.gcfg")
+	err := gcfg.ReadFileInto(&cfg, "../redfactor.cfg")
 	if err != nil {
 		log.Fatal(err)
 	}
