@@ -27,11 +27,28 @@ const (
 
 var fmClient *funcmon.Client
 
-func RunChecker(c chan int) {
-	db, err := sql.Open("sqlite3", "./redfactor.db")
+type Checker struct {
+	dbFile string
+	host string
+	port int
+	influxDb string
+	measurement string
+}
+
+func (checkerPtr *Checker) NewChecker(filename_ string, host_ string, port_ int, influxDb_ string, measurement_ string) {
+	checkerPtr.dbFile = filename_
+	checkerPtr.host = host_
+	checkerPtr.port = port_
+	checkerPtr.influxDb = influxDb_
+	checkerPtr.measurement = measurement_
+	return
+}
+
+func (checkerPtr *Checker) StartChecker(c chan int) {
+	db, err := sql.Open("sqlite3", checkerPtr.dbFile)
 	checkErr(err)
 
-	u, err := url.Parse(fmt.Sprintf("http://%s:%d", MyHost, MyPort))
+	u, err := url.Parse(fmt.Sprintf("http://%s:%d", checkerPtr.host, checkerPtr.port))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -62,26 +79,34 @@ func RunChecker(c chan int) {
 	for {
 		// query
 		rows, err := db.Query("SELECT * FROM queries")
-		checkErr(err)
+		if (err != nil) {
+			log.Fatal(err)
+		} else {
+			for rows.Next() {
+				var rowId int
+				var query string
+				err = rows.Scan(&rowId, &query)
+				checkErr(err)
+				fmt.Println(rowId)
+				fmt.Println(query)
+				res, err := queryDB(con, query)
+				checkErr(err)
 
-		for rows.Next() {
-			var rowId int
-			var query string
-			err = rows.Scan(&rowId, &query)
-			checkErr(err)
-			fmt.Println(rowId)
-			fmt.Println(query)
-			res, err := queryDB(con, query)
-			checkErr(err)
+				vals := res[0].Series[0].Values
 
-			vals := res[0].Series[0].Values
-			fmt.Printf("%v\n", vals[len(vals)-1])
+				//Continue if value is nil
+				if (vals[len(vals) - 1][1] == nil) {
+					log.Printf("%s: Got nil value from db query", "StartChecker")
+					continue
+				}
 
-			val, err := vals[len(vals)-1][1].(json.Number).Float64()
-			checkErr(err)
+				val, err := vals[len(vals) - 1][1].(json.Number).Float64()
+				checkErr(err)
 
-			go evaluate(db, rowId, float64(val), c)
+				go evaluate(db, rowId, float64(val), c)
+			}
 		}
+
 		time.Sleep(5 * time.Minute)
 	}
 }
@@ -91,7 +116,11 @@ func evaluate(db *sql.DB, id int, value float64, c chan int) {
 	query := fmt.Sprintf("SELECT * FROM thresholds WHERE id = %d", id)
 	rows, err := db.Query(query)
 
-	checkErr(err)
+	if (err != nil) {
+		log.Fatal(err)
+		fmClient.EndMonitoring("evaluate")
+		return
+	}
 
 	for rows.Next() {
 		var id int
