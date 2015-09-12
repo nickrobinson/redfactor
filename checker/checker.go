@@ -17,7 +17,6 @@ const (
 	MyHost        = "192.168.1.206"
 	MyPort        = 8086
 	MyDB          = "redfactor"
-	MyMeasurement = "cpu"
 )
 
 const (
@@ -32,15 +31,13 @@ type Checker struct {
 	host string
 	port int
 	influxDb string
-	measurement string
 }
 
-func (checkerPtr *Checker) NewChecker(filename_ string, host_ string, port_ int, influxDb_ string, measurement_ string) {
+func (checkerPtr *Checker) NewChecker(filename_ string, host_ string, port_ int, influxDb_ string) {
 	checkerPtr.dbFile = filename_
 	checkerPtr.host = host_
 	checkerPtr.port = port_
 	checkerPtr.influxDb = influxDb_
-	checkerPtr.measurement = measurement_
 	return
 }
 
