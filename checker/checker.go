@@ -27,14 +27,14 @@ const (
 var fmClient *funcmon.Client
 
 type Checker struct {
-	dbFile string
+	db *sql.DB
 	host string
 	port int
 	influxDb string
 }
 
-func (checkerPtr *Checker) NewChecker(filename_ string, host_ string, port_ int, influxDb_ string) {
-	checkerPtr.dbFile = filename_
+func (checkerPtr *Checker) NewChecker(filename_ *sql.DB, host_ string, port_ int, influxDb_ string) {
+	checkerPtr.db = filename_
 	checkerPtr.host = host_
 	checkerPtr.port = port_
 	checkerPtr.influxDb = influxDb_
@@ -42,9 +42,6 @@ func (checkerPtr *Checker) NewChecker(filename_ string, host_ string, port_ int,
 }
 
 func (checkerPtr *Checker) StartChecker(c chan int) {
-	db, err := sql.Open("sqlite3", checkerPtr.dbFile)
-	checkErr(err)
-
 	u, err := url.Parse(fmt.Sprintf("http://%s:%d", checkerPtr.host, checkerPtr.port))
 	if err != nil {
 		log.Fatal(err)
@@ -75,14 +72,15 @@ func (checkerPtr *Checker) StartChecker(c chan int) {
 
 	for {
 		// query
-		rows, err := db.Query("SELECT * FROM queries")
+		rows, err := checkerPtr.db.Query("SELECT * FROM queries")
 		if (err != nil) {
 			log.Fatal(err)
 		} else {
 			for rows.Next() {
 				var rowId int
 				var query string
-				err = rows.Scan(&rowId, &query)
+				var thresholdId int
+				err = rows.Scan(&rowId, &query, &thresholdId)
 				checkErr(err)
 				fmt.Println(rowId)
 				fmt.Println(query)
@@ -100,7 +98,7 @@ func (checkerPtr *Checker) StartChecker(c chan int) {
 				val, err := vals[len(vals) - 1][1].(json.Number).Float64()
 				checkErr(err)
 
-				go evaluate(db, rowId, float64(val), c)
+				go evaluate(checkerPtr.db, thresholdId, float64(val), c)
 			}
 		}
 
