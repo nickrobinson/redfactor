@@ -1,4 +1,4 @@
-# RedFactor <img src="https://raw.githubusercontent.com/nickrobinson/redfactor/master/public/img/canary.png" alt="Drawing" width="150" height="110"/>
+# <img src="https://raw.githubusercontent.com/nickrobinson/redfactor/master/public/img/canary.png" alt="Drawing" width="150" height="110"/> RedFactor 
 Alarming system built using InfluxDB as a backend
 
 
