@@ -17,7 +17,7 @@ type Notifier struct {
 	
 }
 
-func RunNotifier(c chan int) {
+func StartNotifier(c chan int) {
 	for {
 		rowId := <-c
 		fmt.Println("Row Id: ", rowId)

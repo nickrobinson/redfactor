@@ -10,7 +10,6 @@ import (
 	"os"
 	"time"
 	"encoding/json"
-	"github.com/nickrobinson/funcmon"
 )
 
 const (
@@ -23,8 +22,6 @@ const (
 	ABOVE_THRESHOLD = 0.0
 	BELOW_THRESHOLD = 1.0
 )
-
-var fmClient *funcmon.Client
 
 type Checker struct {
 	db *sql.DB
@@ -63,13 +60,6 @@ func (checkerPtr *Checker) StartChecker(c chan int) {
 	}
 	log.Printf("Happy as a Hippo! %v, %s", dur, ver)
 
-	config := funcmon.Config{
-		Host: "127.0.0.1",
-		Port: 8086,
-		DB: "funcmon",
-	}
-	fmClient,err = funcmon.NewClient(config)
-
 	for {
 		// query
 		rows, err := checkerPtr.db.Query("SELECT * FROM queries")
@@ -107,13 +97,11 @@ func (checkerPtr *Checker) StartChecker(c chan int) {
 }
 
 func evaluate(db *sql.DB, id int, value float64, c chan int) {
-	fmClient.StartMonitoring("evaluate")
 	query := fmt.Sprintf("SELECT * FROM thresholds WHERE id = %d", id)
 	rows, err := db.Query(query)
 
 	if (err != nil) {
 		log.Fatal(err)
-		fmClient.EndMonitoring("evaluate")
 		return
 	}
 
@@ -138,7 +126,6 @@ func evaluate(db *sql.DB, id int, value float64, c chan int) {
 			}
 		}
 	}
-	fmClient.EndMonitoring("evaluate")
 }
 
 // queryDB convenience function to query the database
