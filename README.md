@@ -1,5 +1,7 @@
-# RedFactor
+# RedFactor ![alt text](https://raw.githubusercontent.com/nickrobinson/redfactor/master/public/img/canary.png "Redfactor")
 Alarming system built using InfluxDB as a backend
+
+
 
 [More Details](http://nickrobinson.github.io/redfactor/) 
 
