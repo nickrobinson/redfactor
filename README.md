@@ -1,4 +1,4 @@
-# RedFactor ![alt text](https://raw.githubusercontent.com/nickrobinson/redfactor/master/public/img/canary.png "Redfactor")
+# RedFactor <img src="https://raw.githubusercontent.com/nickrobinson/redfactor/master/public/img/canary.png" alt="Drawing" width="150" height="110"/>
 Alarming system built using InfluxDB as a backend
 
 
