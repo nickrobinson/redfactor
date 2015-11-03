@@ -48,7 +48,21 @@ func bootstrapMartini() {
 	}))
 
 	m.Get("/", func(r render.Render) {
-		r.HTML(http.StatusOK, "index", "info")
+		var retData struct {
+			Success bool
+		}
+		retData.Success = false
+
+		r.HTML(http.StatusOK, "index", retData)
+	})
+
+	m.Post("/", func(r render.Render) {
+		var retData struct {
+			Success bool
+		}
+		retData.Success = true
+
+		r.HTML(http.StatusOK, "index", retData)
 	})
 
 	m.Get("/info", func(r render.Render) {

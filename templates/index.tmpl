@@ -1,8 +1,29 @@
+{{ if .Success }}
+<div class="alert alert-success" role="alert">
+    <a href="#" class="close" data-dismiss="alert">&times;</a>
+    <strong>Success!</strong>
+</div>
+{{ end }}
+
 <div class="starter-template">
-    <form>
+    <form class="form-horizontal" method="post">
         <div class="form-group">
-            <label for="exampleInputEmail1">Influx Query</label>
-            <input class="form-control" id="influxQuery" placeholder="SELECT * FROM influx">
+            <label for="database" class="col-sm-2 control-label">Database</label>
+            <div class="col-sm-10">
+                <input class="form-control" id="database" placeholder="db1">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="retention" class="col-sm-2 control-label">Retention</label>
+            <div class="col-sm-10">
+                <input class="form-control" id="retention" placeholder='"default"'>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="measurement" class="col-sm-2 control-label">Measurement</label>
+            <div class="col-sm-10">
+                <input class="form-control" id="measurement" placeholder="cpu_load">
+            </div>
         </div>
         <button type="submit" class="btn btn-default">Submit</button>
     </form>
